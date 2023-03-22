@@ -6,6 +6,17 @@ exports.index = (_req, res) => {
 
 exports.singleWarehouse = (req, res) => {
   knex("warehouses")
+    .select(
+      "id",
+      "warehouse_name",
+      "address",
+      "city",
+      "country",
+      "contact_name",
+      "contact_position",
+      "contact_phone",
+      "contact_email",
+    ) // Exclude timestamps of created & updated 
     .where({ id: req.params.id })
     .then((warehouses) => {
       if (warehouses.length === 0) {
@@ -14,7 +25,7 @@ exports.singleWarehouse = (req, res) => {
         });
       }
 
-      res.json(warehouses[0]);
+      res.json(warehouses[0]); // Will send back a 200 status code by default
     })
     .catch((error) => {
       return res.status(500).json({
