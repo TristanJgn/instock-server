@@ -92,17 +92,16 @@ exports.addWarehouse = (req, res) => {
   const phoneRegexValidation = /^(\+\d+)\s\(\d{3}\)\s\d{3}-\d{4}$/;
   if (!contact_phone.match(phoneRegexValidation)) {
     return res.status(400).json({
-      message:
-        "Please use a phone number format of +1 (123) 456-7890",
+      message: "Please use a phone number format of +1 (123) 456-7890",
     });
   }
 
   // Use a regex expression to check for a valid email:
-  // Must have 1 or more alphanumeric characters (allows for a dot, hyphen, or underscore as well) before an @ sign
-  // Must then 1 or more alphanumeric characters before (not allowing for a dot, hyphen, or underscore) before a .
+  // Must have 1 or more alphanumeric characters (allows for a dot, underscore, or hyphen as well) before an @ sign
+  // Must then 1 or more alphanumeric characters before (not allowing for a dot, underscore, or hyphen) before a .
   // Must be followed by a domain which only has letters and is between 2-10 characters long
   const emailRegexValidation =
-    /^([a-zA-Z\d.-_]+)@([a-zA-Z\d]+)\.([a-zA-Z]{2,10})$/;
+    /^([a-zA-Z\d._-]+)@([a-zA-Z\d]+)\.([a-zA-Z]{2,10})$/;
   if (!contact_email.match(emailRegexValidation)) {
     return res.status(400).json({
       message: "Please enter a valid email",
@@ -125,18 +124,18 @@ exports.addWarehouse = (req, res) => {
     })
     .then(() => {
       return knex("warehouses")
-      .select(
-      "id",
-      "warehouse_name",
-      "address",
-      "city",
-      "country",
-      "contact_name",
-      "contact_position",
-      "contact_phone",
-      "contact_email",
-      )
-      .where({ id: newWarehouseID });
+        .select(
+          "id",
+          "warehouse_name",
+          "address",
+          "city",
+          "country",
+          "contact_name",
+          "contact_position",
+          "contact_phone",
+          "contact_email"
+        )
+        .where({ id: newWarehouseID });
     })
     .then((warehouses) => {
       return res.status(201).json(warehouses[0]);
