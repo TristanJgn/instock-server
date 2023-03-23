@@ -3,11 +3,13 @@ const knex = require("knex")(require("../knexfile"));
 exports.index = (req, res) => {
   knex("warehouses")
     .select(
+      "id",
       "warehouse_name",
       "address",
       "city",
       "country",
       "contact_name",
+      "contact_position",
       "contact_phone",
       "contact_email",
     )
