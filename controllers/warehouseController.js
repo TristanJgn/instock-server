@@ -1,8 +1,28 @@
 const knex = require("knex")(require("../knexfile"));
 const { v4: uuidv4 } = require("uuid");
 
-exports.index = (_req, res) => {
-  res.send("Warehouse homepage");
+exports.index = (req, res) => {
+  knex("warehouses")
+    .select(
+      "id",
+      "warehouse_name",
+      "address",
+      "city",
+      "country",
+      "contact_name",
+      "contact_position",
+      "contact_phone",
+      "contact_email",
+    )
+    .then((data) => {
+      res.json(data);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "There was an issue with the request",
+        err,
+      });
+    });
 };
 
 exports.singleWarehouse = (req, res) => {
