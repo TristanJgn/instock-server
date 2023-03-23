@@ -98,11 +98,11 @@ exports.addWarehouse = (req, res) => {
   }
 
   // Use a regex expression to check for a valid email:
-  // Must have 1 or more alphanumeric characters (allows for a dot or hyphen as well) before an @ sign
-  // Must then 1 or more alphanumeric characters before (not allowing for a dot or hyphen) before a .
+  // Must have 1 or more alphanumeric characters (allows for a dot, hyphen, or underscore as well) before an @ sign
+  // Must then 1 or more alphanumeric characters before (not allowing for a dot, hyphen, or underscore) before a .
   // Must be followed by a domain which only has letters and is between 2-10 characters long
   const emailRegexValidation =
-    /^([a-zA-Z\d.-]+)@([a-zA-Z\d]+)\.([a-zA-z]{2,10})$/;
+    /^([a-zA-Z\d.-_]+)@([a-zA-Z\d]+)\.([a-zA-Z]{2,10})$/;
   if (!contact_email.match(emailRegexValidation)) {
     return res.status(400).json({
       message: "Please enter a valid email",
