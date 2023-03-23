@@ -16,7 +16,6 @@ app.use(cors());
 app.use(express.json());
 
 // Define routes
-app.use("/", warehouseRoutes);
 app.use("/warehouses", warehouseRoutes);
 app.use("/inventory", inventoryRoutes);
 
