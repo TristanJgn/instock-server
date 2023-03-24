@@ -168,3 +168,39 @@ exports.addWarehouse = (req, res) => {
       });
     });
 }
+
+// get request for given warehouse
+
+exports.singleWarehouseInventory = (req, res) => {
+  console.log(req.params.id)
+  knex("warehouses")
+    .join (
+      "inventories",
+      "warehouses.id",
+      "=",
+      "inventories.warehouse_id"
+    )
+    .where({ "warehouses.id": req.params.id })
+    .select(
+      "inventories.id",
+      "inventories.item_name",
+      "inventories.category",
+      "inventories.status",
+      "inventories.quantity",
+    )
+    .then((data) => {
+      if (data.length === 0) {
+        return res.status(404).json({
+          message: `Unable to find warehouse with id: ${req.params.id}`,
+        });
+      }
+      res.json(data); 
+    })
+    .catch((error) => {
+      console.log(error)
+      return res.status(500).json({
+        message: "There was an issue with the request",
+        error,
+      });
+    });
+};
