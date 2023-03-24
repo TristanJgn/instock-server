@@ -5,6 +5,8 @@ router
   .route("/")
   .get(warehouseController.index)
 
-router.route("/:id").get(warehouseController.singleWarehouse);
+router.route("/:id")
+  .get(warehouseController.singleWarehouse)
+  .delete(warehouseController.deleteWarehouse);
 
 module.exports = router;
