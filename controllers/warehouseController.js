@@ -169,8 +169,6 @@ exports.addWarehouse = (req, res) => {
     });
 }
 
-// get request for given warehouse
-
 exports.singleWarehouseInventory = (req, res) => {
   console.log(req.params.id)
   knex("warehouses")
