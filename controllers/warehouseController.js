@@ -270,6 +270,7 @@ exports.editWarehouse = (req, res) => {
     .then(() => {
       return knex("warehouses")
         .select(
+          "id",
           "warehouse_name",
           "address",
           "city",
