@@ -256,6 +256,7 @@ exports.editWarehouse = (req, res) => {
   }
 
   knex("warehouses")
+    .where({ id: req.params.id })
     .update({
       warehouse_name,
       address,
