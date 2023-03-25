@@ -1,3 +1,6 @@
+import uuidv4 from "uuidv4";
+
+
 exports.index = (_req, res) => {
   res.send("Inventory homepage");
 };
@@ -18,38 +21,36 @@ exports.addInventory = (req, res) => {
 
   const { warehouse_id, item_name, description, category, status, quantity } =
     req.body;
-
-  // Check for unique item name
   knex("inventories")
-    .where({ item_name: item_name })
-    .then((inventories) => {
-      if (inventories.length > 0) {
+    .where({ item_name: item_name, warehouse_id: warehouse_id })
+    .then((warehouses) => {
+      if (warehouses) {
         return res.status(400).json({
-          message: "Item already exists",
+          message: `An item with the name: ${item_name} already exists in the warehouse: ${warehouse_id}.`,
         });
       }
+          knex("inventories")
+            .insert({
+              item_name,
+              description,
+              category,
+              status,
+              quantity,
+            })
+            .then((createdIds) => {
+              const itemId = uuidv4();
 
-      knex("inventories")
-        .insert({
-          item_name,
-          description,
-          category,
-          status,
-          quantity,
-        })
-        .then((createdIds) => {
-          const warehouseId = createdIds[0];
-
-          return knex("warehouse").where({ id: warehouseId });
-        })
-        .then((warehouses) => {
-          return res.status(201).json(warehouses[0]);
-        })
-        .catch((error) => {
-          return res.status(400).json({
-            message: "There was an issue with the request",
-            error,
-          });
+              return knex("warehouse").where({ id: warehouseId });
+            })
+            .then((warehouses) => {
+              return res.status(201).json(warehouses[0]);
+            })
+            .catch((error) => {
+              return res.status(400).json({
+                message: "There was an issue with the request",
+                error,
+              });
+            });
         });
     });
 };
