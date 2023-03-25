@@ -170,7 +170,6 @@ exports.addWarehouse = (req, res) => {
 }
 
 exports.singleWarehouseInventory = (req, res) => {
-  console.log(req.params.id)
   knex("warehouses")
     .join (
       "inventories",
@@ -195,7 +194,6 @@ exports.singleWarehouseInventory = (req, res) => {
       res.json(data); 
     })
     .catch((error) => {
-      console.log(error)
       return res.status(500).json({
         message: "There was an issue with the request",
         error,
