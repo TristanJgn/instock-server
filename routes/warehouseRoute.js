@@ -8,7 +8,8 @@ router
 
 router.route("/:id")
   .get(warehouseController.singleWarehouse)
-  .delete(warehouseController.deleteWarehouse);
+  .delete(warehouseController.deleteWarehouse)
+  .put(warehouseController.editWarehouse);
 
 router.route("/:id/inventories")
   .get(warehouseController.singleWarehouseInventory);  

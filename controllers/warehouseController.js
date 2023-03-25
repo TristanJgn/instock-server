@@ -170,7 +170,6 @@ exports.addWarehouse = (req, res) => {
 }
 
 exports.singleWarehouseInventory = (req, res) => {
-  console.log(req.params.id)
   knex("warehouses")
     .join (
       "inventories",
@@ -195,10 +194,104 @@ exports.singleWarehouseInventory = (req, res) => {
       res.json(data); 
     })
     .catch((error) => {
-      console.log(error)
       return res.status(500).json({
         message: "There was an issue with the request",
         error,
       });
     });
 };
+
+exports.editWarehouse = (req, res) => {
+  const {
+    warehouse_name,
+    address,
+    city,
+    country,
+    contact_name,
+    contact_position,
+    contact_phone,
+    contact_email,
+  } = req.body;
+
+  if (
+    !warehouse_name ||
+    !address ||
+    !city ||
+    !country ||
+    !contact_name ||
+    !contact_position ||
+    !contact_phone ||
+    !contact_email
+  ) {
+    return res.status(400).json({
+      message:
+        "Missing one or more required fields: warehouse name, address, city, country, contact name, contact position, contact phone number, contact email",
+    });
+  }
+
+  // Use a regex expression to check for desired phone number format:
+  // Must begin with a + followed by an areacode (1 or more digits) followed by a space
+  // Must then be 3 digits contained in () followed by a space
+  // Must then be 3 digits followed by a hyphen
+  // Must end with 4 digits
+  const phoneRegexValidation = /^(\+\d+)\s\(\d{3}\)\s\d{3}-\d{4}$/;
+  if (!contact_phone.match(phoneRegexValidation)) {
+    return res.status(400).json({
+      message: "Please use a phone number format of +1 (123) 456-7890",
+    });
+  }
+
+  // Use a regex expression to check for a valid email:
+  // Must have 1 or more alphanumeric characters (allows for a dot, underscore, or hyphen as well) before an @ sign
+  // Must then 1 or more alphanumeric characters before (not allowing for a dot, underscore, or hyphen) before a .
+  // Must be followed by a domain which only has letters and is between 2-10 characters long
+  const emailRegexValidation =
+    /^([a-zA-Z\d._-]+)@([a-zA-Z\d]+)\.([a-zA-Z]{2,10})$/;
+  if (!contact_email.match(emailRegexValidation)) {
+    return res.status(400).json({
+      message: "Please enter a valid email",
+    });
+  }
+
+  knex("warehouses")
+    .where({ id: req.params.id })
+    .update({
+      warehouse_name,
+      address,
+      city,
+      country,
+      contact_name,
+      contact_position,
+      contact_phone,
+      contact_email,
+    })
+    .then(() => {
+      return knex("warehouses")
+        .select(
+          "id",
+          "warehouse_name",
+          "address",
+          "city",
+          "country",
+          "contact_name",
+          "contact_position",
+          "contact_phone",
+          "contact_email"
+        )
+        .where({ id: req.params.id });
+    })
+    .then((warehouses) => {
+      if (warehouses.length === 0) {
+        return res.status(404).json({
+          message: `Unable to find warehouse with id: ${req.params.id}`,
+        });
+      }
+      res.status(200).json(warehouses[0]);
+    })
+    .catch((error) => {
+      return res.status(500).json({
+        message: "There was an issue with the request",
+        error,
+      });
+    });
+}
