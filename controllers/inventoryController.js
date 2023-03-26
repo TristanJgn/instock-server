@@ -3,12 +3,7 @@ import uuidv4 from "uuidv4";
 
 exports.index = (req, res) => {
   knex("inventories")
-    .join(
-      "warehouses",
-      "warehouse_id",
-      "=",
-      "warehouses.id"
-    )
+    .join("warehouses", "warehouse_id", "=", "warehouses.id")
     .select(
       "inventories.id",
       "warehouses.warehouse_name",
@@ -16,7 +11,7 @@ exports.index = (req, res) => {
       "inventories.description",
       "inventories.category",
       "inventories.status",
-      "inventories.quantity",
+      "inventories.quantity"
     )
     .then((data) => {
       res.json(data);
@@ -34,31 +29,25 @@ exports.deleteInventory = (req, res) => {
   knex("inventories")
     .where({ id: req.params.id })
     .del()
-    .then(numberofInventoriesDeleted => {
-
+    .then((numberofInventoriesDeleted) => {
       if (numberofInventoriesDeleted === 0) {
         return res.status(404).json({
-          message: `Inventory item not found with id ${req.params.id}`
-        })
+          message: `Inventory item not found with id ${req.params.id}`,
+        });
       }
       res.sendStatus(204);
     })
-    .catch(error => {
+    .catch((error) => {
       return res.status(400).json({
         message: "There was an issue with the request",
-        error
-      })
-    })
-}
+        error,
+      });
+    });
+};
 
 exports.singleItem = (req, res) => {
   knex("inventories")
-    .join (
-      "warehouses",
-      "inventories.warehouse_id",
-      "=",
-      "warehouses.id"
-    )
+    .join("warehouses", "inventories.warehouse_id", "=", "warehouses.id")
     .select(
       "inventories.id",
       "warehouses.warehouse_name",
@@ -66,17 +55,17 @@ exports.singleItem = (req, res) => {
       "inventories.description",
       "inventories.category",
       "inventories.status",
-      "inventories.quantity",
+      "inventories.quantity"
     )
     .where({ "inventories.id": req.params.id })
     .then((data) => {
       if (data.length === 0) {
         return res.status(404).json({
           message: `Unable to find item with id: ${req.params.id}`,
-        })
+        });
       }
       res.json(data);
-    })  
+    })
     .catch((err) => {
       res.status(500).json({
         message: "Issue with request",
@@ -109,32 +98,27 @@ exports.addInventory = (req, res) => {
           message: `An item with the name: ${item_name} already exists in the warehouse: ${warehouse_id}.`,
         });
       }
-          knex("inventories")
-            .insert({
-              item_name,
-              description,
-              category,
-              status,
-              quantity,
-            })
-            .then((createdIds) => {
-              const itemId = uuidv4();
+      knex("inventories")
+        .insert({
+          item_name,
+          description,
+          category,
+          status,
+          quantity,
+        })
+        .then((createdIds) => {
+          const itemId = uuidv4();
 
-              return knex("warehouse").where({ id: warehouseId });
-            })
-            .then((warehouses) => {
-              return res.status(201).json(warehouses[0]);
-            })
-            .catch((error) => {
-              return res.status(400).json({
-                message: "There was an issue with the request",
-                error,
-              });
-            });
+          return knex("warehouse").where({ id: warehouseId });
+        })
+        .then((warehouses) => {
+          return res.status(201).json(warehouses[0]);
+        })
+        .catch((error) => {
+          return res.status(400).json({
+            message: "There was an issue with the request",
+            error,
+          });
         });
-    })
-}
-
-
-
-
+    });
+};
