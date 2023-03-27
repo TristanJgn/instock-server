@@ -92,55 +92,54 @@ exports.addInventory = (req, res) => {
         "Missing one or more required fields: warehouse id, item name, description, category, status, quantity",
     });
   }
+
   const isInt = parseInt(quantity);
   if (!Number.isInteger(isInt)) {
     return res.status(400).json({
       message: "Please enter a number value",
     });
   }
-  // Response returns 400 if the warehouse_id value does not exist in the warehouses table
-  // Response returns 400 if the quantity is not a number
 
   knex("inventories")
-    .where({ item_name: item_name, warehouse_id: warehouse_id })
+    .where({ warehouse_id: warehouse_id })
     .then((inventories) => {
-      if (inventories) {
+      if (inventories.length === 0) {
         return res.status(400).json({
           message: "There is no warehouse matching the inputed id",
         });
       }
+    });
 
-      knex("inventories")
-        .insert({
-          id: newID,
-          warehouse_id,
-          item_name,
-          description,
-          category,
-          status,
-          quantity,
-        })
-        .then(() => {
-          return knex("inventories")
-            .select(
-              "id",
-              "warehouse_id",
-              "item_name",
-              "description",
-              "category",
-              "status",
-              "quantity"
-            )
-            .where({ id: newID });
-        })
-        .then((inventories) => {
-          return res.status(201).json(inventories[0]);
-        })
-        .catch((error) => {
-          return res.status(400).json({
-            message: "There was an issue with the request",
-            error,
-          });
-        });
+  knex("inventories")
+    .insert({
+      id: newID,
+      warehouse_id,
+      item_name,
+      description,
+      category,
+      status,
+      quantity,
+    })
+    .then(() => {
+      return knex("inventories")
+        .select(
+          "id",
+          "warehouse_id",
+          "item_name",
+          "description",
+          "category",
+          "status",
+          "quantity"
+        )
+        .where({ id: newID });
+    })
+    .then((inventories) => {
+      return res.status(201).json(inventories[0]);
+    })
+    .catch((error) => {
+      return res.status(400).json({
+        message: "There was an issue with the request",
+        error,
+      });
     });
 };
