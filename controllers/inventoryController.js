@@ -1,5 +1,6 @@
 const knex = require("knex")(require("../knexfile"));
 const { v4: uuidv4 } = require("uuid");
+
 exports.index = (req, res) => {
   knex("inventories")
     .join("warehouses", "warehouse_id", "=", "warehouses.id")
@@ -73,34 +74,45 @@ exports.singleItem = (req, res) => {
     });
 };
 
-exports.editInventory = (req, res) => {
+exports.addInventory = (req, res) => {
   const { warehouse_id, item_name, description, category, status, quantity } =
     req.body;
+  const newID = uuidv4();
 
   if (
-    !warehouse_id ||
-    !item_name ||
-    !description ||
-    !category ||
-    !status ||
-    !quantity
+    !req.body.warehouse_id ||
+    !req.body.item_name ||
+    !req.body.description ||
+    !req.body.category ||
+    !req.body.status ||
+    !req.body.quantity
   ) {
     return res.status(400).json({
       message:
-        "Missing one or more required fields: warehouse_id, item_name, description, category, status, quantity",
+        "Missing one or more required fields: warehouse id, item name, description, category, status, quantity",
     });
   }
 
   const isInt = parseInt(quantity);
   if (!Number.isInteger(isInt)) {
     return res.status(400).json({
-      message: "Please enter a number value for the quantity",
+      message: "Please enter a number value",
     });
   }
 
   knex("inventories")
-    .where({ id: req.params.id })
-    .update({
+    .where({ warehouse_id: warehouse_id })
+    .then((inventories) => {
+      if (inventories.length === 0) {
+        return res.status(400).json({
+          message: "There is no warehouse matching the inputed id",
+        });
+      }
+    });
+
+  knex("inventories")
+    .insert({
+      id: newID,
       warehouse_id,
       item_name,
       description,
@@ -119,18 +131,13 @@ exports.editInventory = (req, res) => {
           "status",
           "quantity"
         )
-        .where({ id: req.params.id });
+        .where({ id: newID });
     })
     .then((inventories) => {
-      if (inventories.length === 0) {
-        return res.status(404).json({
-          message: `Unable to find inventory item with id: ${req.params.id}`,
-        });
-      }
-      res.status(200).json(inventories[0]);
+      return res.status(201).json(inventories[0]);
     })
     .catch((error) => {
-      return res.status(500).json({
+      return res.status(400).json({
         message: "There was an issue with the request",
         error,
       });
