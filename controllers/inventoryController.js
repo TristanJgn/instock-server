@@ -143,3 +143,71 @@ exports.addInventory = (req, res) => {
       });
     });
 };
+
+exports.editInventory = (req, res) => {
+  const { warehouse_id, item_name, description, category, status, quantity } =
+    req.body;
+
+  if (
+    !req.body.warehouse_id ||
+    !req.body.item_name ||
+    !req.body.description ||
+    !req.body.category ||
+    !req.body.status ||
+    !req.body.quantity
+  ) {
+    return res.status(400).json({
+      message:
+        "Missing one or more required fields: warehouse id, item name, description, category, status, quantity",
+    });
+  }
+
+  const isInt = parseInt(quantity);
+  if (!Number.isInteger(isInt)) {
+    return res.status(400).json({
+      message: "Please enter a number value",
+    });
+  }
+
+  knex("inventories")
+    .where({ warehouse_id: warehouse_id })
+    .then((inventories) => {
+      if (inventories.length === 0) {
+        return res.status(400).json({
+          message: "There is no warehouse matching the inputed id",
+        });
+      }
+    });
+
+  knex("inventories")
+    .update({
+      warehouse_id,
+      item_name,
+      description,
+      category,
+      status,
+      quantity,
+    })
+    .then(() => {
+      return knex("inventories")
+        .select(
+          "id",
+          "warehouse_id",
+          "item_name",
+          "description",
+          "category",
+          "status",
+          "quantity"
+        )
+        .where({ id: newID });
+    })
+    .then((inventories) => {
+      return res.status(201).json(inventories[0]);
+    })
+    .catch((error) => {
+      return res.status(400).json({
+        message: "There was an issue with the request",
+        error,
+      });
+    });
+};
