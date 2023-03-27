@@ -1,5 +1,5 @@
 const knex = require("knex")(require("../knexfile"));
-import uuidv4 from "uuidv4";
+const { v4: uuidv4 } = require("uuid");
 
 exports.index = (req, res) => {
   knex("inventories")
@@ -75,6 +75,10 @@ exports.singleItem = (req, res) => {
 };
 
 exports.addInventory = (req, res) => {
+  const { warehouse_id, item_name, description, category, status, quantity } =
+    req.body;
+  const newID = uuidv4();
+
   if (
     !req.body.warehouse_id ||
     !req.body.item_name ||
@@ -84,35 +88,53 @@ exports.addInventory = (req, res) => {
     !req.body.quantity
   ) {
     return res.status(400).json({
-      message: "Missing one or more required fields",
+      message:
+        "Missing one or more required fields: warehouse id, item name, description, category, status, quantity",
     });
   }
+  const isInt = parseInt(quantity);
+  if (!Number.isInteger(isInt)) {
+    return res.status(400).json({
+      message: "Please enter a number value",
+    });
+  }
+  // Response returns 400 if the warehouse_id value does not exist in the warehouses table
+  // Response returns 400 if the quantity is not a number
 
-  const { warehouse_id, item_name, description, category, status, quantity } =
-    req.body;
   knex("inventories")
     .where({ item_name: item_name, warehouse_id: warehouse_id })
-    .then((warehouses) => {
-      if (warehouses) {
+    .then((inventories) => {
+      if (inventories) {
         return res.status(400).json({
-          message: `An item with the name: ${item_name} already exists in the warehouse: ${warehouse_id}.`,
+          message: "There is no warehouse matching the inputed id",
         });
       }
+
       knex("inventories")
         .insert({
+          id: newID,
+          warehouse_id,
           item_name,
           description,
           category,
           status,
           quantity,
         })
-        .then((createdIds) => {
-          const itemId = uuidv4();
-
-          return knex("warehouse").where({ id: warehouseId });
+        .then(() => {
+          return knex("inventories")
+            .select(
+              "id",
+              "warehouse_id",
+              "item_name",
+              "description",
+              "category",
+              "status",
+              "quantity"
+            )
+            .where({ id: newID });
         })
-        .then((warehouses) => {
-          return res.status(201).json(warehouses[0]);
+        .then((inventories) => {
+          return res.status(201).json(inventories[0]);
         })
         .catch((error) => {
           return res.status(400).json({
