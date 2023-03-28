@@ -180,6 +180,7 @@ exports.editInventory = (req, res) => {
     });
 
   knex("inventories")
+    .where({ id: req.params.id })
     .update({
       warehouse_id,
       item_name,
@@ -188,7 +189,6 @@ exports.editInventory = (req, res) => {
       status,
       quantity,
     })
-    .where({ id: req.params.id })
     .then(() => {
       return knex("inventories")
         .select(
@@ -211,7 +211,7 @@ exports.editInventory = (req, res) => {
       res.status(200).json(inventories[0]);
     })
     .catch((error) => {
-      return res.status(400).json({
+      return res.status(500).json({
         message: "There was an issue with the request",
         error,
       });
