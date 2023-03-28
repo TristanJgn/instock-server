@@ -188,6 +188,7 @@ exports.editInventory = (req, res) => {
       status,
       quantity,
     })
+    .where({ id: req.params.id })
     .then(() => {
       return knex("inventories")
         .select(
@@ -199,10 +200,15 @@ exports.editInventory = (req, res) => {
           "status",
           "quantity"
         )
-        .where({ id: newID });
+        .where({ id: req.params.id });
     })
     .then((inventories) => {
-      return res.status(201).json(inventories[0]);
+      if (inventories.length === 0) {
+        return res.status(404).json({
+          message: `Unable to find warehouse with id: ${req.params.id}`,
+        });
+      }
+      res.status(200).json(inventories[0]);
     })
     .catch((error) => {
       return res.status(400).json({
