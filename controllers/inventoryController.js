@@ -85,7 +85,7 @@ exports.addInventory = (req, res) => {
     !req.body.description ||
     !req.body.category ||
     !req.body.status ||
-    !req.body.quantity
+    (!req.body.quantity && req.body.status === "In Stock") // Only check quantity value if the item is said to be In Stock
   ) {
     return res.status(400).json({
       message:
