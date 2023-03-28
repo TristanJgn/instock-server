@@ -64,7 +64,7 @@ exports.singleItem = (req, res) => {
           message: `Unable to find item with id: ${req.params.id}`,
         });
       }
-      res.json(data);
+      res.json(data[0]);
     })
     .catch((err) => {
       res.status(500).json({
